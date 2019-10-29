@@ -86,6 +86,8 @@ type UpdateParameters struct {
 	SkipFullfiles bool
 	// Skip zero packs generation
 	SkipPacks bool
+	// Skip update index generation
+	SkipUpdateIndex bool
 }
 
 var localPackages = make(map[string]bool)

@@ -48,6 +48,7 @@ type buildCmdFlags struct {
 	template        string
 	skipFullfiles   bool
 	skipPacks       bool
+	skipUpdateIndex bool
 	to              int
 	from            int
 	toRepoURLs      *map[string]string
@@ -337,12 +338,13 @@ var buildFormatOldCmd = &cobra.Command{
 
 		// Build the update content for the +10 build
 		params := builder.UpdateParameters{
-			MinVersion:    buildFlags.minVersion,
-			Format:        b.State.Mix.Format,
-			Publish:       !buildFlags.noPublish,
-			SkipSigning:   buildFlags.noSigning,
-			SkipFullfiles: buildFlags.skipFullfiles,
-			SkipPacks:     buildFlags.skipPacks,
+			MinVersion:      buildFlags.minVersion,
+			Format:          b.State.Mix.Format,
+			Publish:         !buildFlags.noPublish,
+			SkipSigning:     buildFlags.noSigning,
+			SkipFullfiles:   buildFlags.skipFullfiles,
+			SkipPacks:       buildFlags.skipPacks,
+			SkipUpdateIndex: buildFlags.skipUpdateIndex,
 		}
 		if err = b.BuildUpdate(params); err != nil {
 			failf("Couldn't build update: %s", err)
@@ -411,12 +413,13 @@ var buildFormatNewCmd = &cobra.Command{
 
 		// Build the +20 update so we don't have to switch tooling in between
 		params := builder.UpdateParameters{
-			MinVersion:    minver,
-			Format:        buildFlags.newFormat,
-			Publish:       !buildFlags.noPublish,
-			SkipSigning:   buildFlags.noSigning,
-			SkipFullfiles: buildFlags.skipFullfiles,
-			SkipPacks:     buildFlags.skipPacks,
+			MinVersion:      minver,
+			Format:          buildFlags.newFormat,
+			Publish:         !buildFlags.noPublish,
+			SkipSigning:     buildFlags.noSigning,
+			SkipFullfiles:   buildFlags.skipFullfiles,
+			SkipPacks:       buildFlags.skipPacks,
+			SkipUpdateIndex: buildFlags.skipUpdateIndex,
 		}
 		err = b.BuildUpdate(params)
 		if err != nil {
@@ -447,12 +450,13 @@ var buildUpdateCmd = &cobra.Command{
 		}
 		setWorkers(b)
 		params := builder.UpdateParameters{
-			MinVersion:    buildFlags.minVersion,
-			Format:        buildFlags.format,
-			Publish:       !buildFlags.noPublish,
-			SkipSigning:   buildFlags.noSigning,
-			SkipFullfiles: buildFlags.skipFullfiles,
-			SkipPacks:     buildFlags.skipPacks,
+			MinVersion:      buildFlags.minVersion,
+			Format:          buildFlags.format,
+			Publish:         !buildFlags.noPublish,
+			SkipSigning:     buildFlags.noSigning,
+			SkipFullfiles:   buildFlags.skipFullfiles,
+			SkipPacks:       buildFlags.skipPacks,
+			SkipUpdateIndex: buildFlags.skipUpdateIndex,
 		}
 		err = b.BuildUpdate(params)
 		if err != nil {
@@ -496,12 +500,13 @@ var buildAllCmd = &cobra.Command{
 			failf("Couldn't build bundles: %s", err)
 		}
 		params := builder.UpdateParameters{
-			MinVersion:    buildFlags.minVersion,
-			Format:        buildFlags.format,
-			Publish:       !buildFlags.noPublish,
-			SkipSigning:   buildFlags.noSigning,
-			SkipFullfiles: buildFlags.skipFullfiles,
-			SkipPacks:     buildFlags.skipPacks,
+			MinVersion:      buildFlags.minVersion,
+			Format:          buildFlags.format,
+			Publish:         !buildFlags.noPublish,
+			SkipSigning:     buildFlags.noSigning,
+			SkipFullfiles:   buildFlags.skipFullfiles,
+			SkipPacks:       buildFlags.skipPacks,
+			SkipUpdateIndex: buildFlags.skipUpdateIndex,
 		}
 		err = b.BuildUpdate(params)
 		if err != nil {
@@ -682,6 +687,7 @@ func setUpdateFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVar(&buildFlags.noPublish, "no-publish", false, "Do not update the latest version after update")
 	cmd.Flags().BoolVar(&buildFlags.skipFullfiles, "skip-fullfiles", false, "Do not generate fullfiles")
 	cmd.Flags().BoolVar(&buildFlags.skipPacks, "skip-packs", false, "Do not generate zero packs")
+	cmd.Flags().BoolVar(&buildFlags.skipUpdateIndex, "skip-update-index", false, "Don't generate os-core-update for this build")
 
 	var unusedStringFlag string
 	cmd.Flags().StringVar(&unusedStringFlag, "prefix", "", "Supply prefix for where the swupd binaries live")

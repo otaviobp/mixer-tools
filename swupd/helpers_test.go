@@ -173,7 +173,7 @@ func mustCreateManifestsStandard(t *testing.T, ver, previousVer uint32, testDir 
 
 func mustCreateManifests(t *testing.T, ver, previousVer, minVer uint32, format uint, testDir string) *MoM {
 	t.Helper()
-	mom, err := CreateManifests(ver, previousVer, minVer, format, testDir, runtime.NumCPU())
+	mom, err := CreateManifests(ver, previousVer, minVer, format, testDir, runtime.NumCPU(), false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -800,7 +800,7 @@ func (ts *testSwupd) createManifests(version uint32) *MoM {
 	osRelease := fmt.Sprintf("VERSION_ID=%d\n", version)
 	ts.addFile(version, "os-core", "/usr/lib/os-release", osRelease)
 
-	mom, err := CreateManifests(version, ts.PreviousVersion, ts.MinVersion, ts.Format, ts.Dir, runtime.NumCPU())
+	mom, err := CreateManifests(version, ts.PreviousVersion, ts.MinVersion, ts.Format, ts.Dir, runtime.NumCPU(), false)
 	if err != nil {
 		ts.t.Fatalf("error creating manifests for version %d: %s", version, err)
 	}
@@ -821,7 +821,7 @@ func (ts *testSwupd) createManifestsFromChroots(version uint32) *MoM {
 	osRelease := fmt.Sprintf("VERSION_ID=%d\n", version)
 	ts.write(filepath.Join("image", fmt.Sprint(version), "os-core", "usr/lib/os-release"), osRelease)
 
-	mom, err := CreateManifests(version, ts.PreviousVersion, ts.MinVersion, ts.Format, ts.Dir, runtime.NumCPU())
+	mom, err := CreateManifests(version, ts.PreviousVersion, ts.MinVersion, ts.Format, ts.Dir, runtime.NumCPU(), false)
 	if err != nil {
 		ts.t.Fatalf("error creating manifests for version %d: %s", version, err)
 	}

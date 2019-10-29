@@ -224,13 +224,13 @@ func processBundles(ui UpdateInfo, c config, numWorkers int) ([]*Manifest, error
 	return newManifests, nil
 }
 
-func addUnchangedManifests(appendTo *Manifest, appendFrom *Manifest, bundles []string) {
+func addUnchangedManifests(appendTo *Manifest, appendFrom *Manifest, bundles []string, skipUpdateIndex bool) {
 	for _, f := range appendFrom.Files {
 		if f.findFileNameInSlice(appendTo.Files) != nil {
 			continue
 		}
 
-		if f.Name == IndexBundle {
+		if !skipUpdateIndex && f.Name == IndexBundle {
 			// this is generated new each time
 			continue
 		}
@@ -298,7 +298,7 @@ func aggregateManifests(newManifests []*Manifest, newMoM *Manifest, version uint
 }
 
 // CreateManifests creates update manifests for changed and added bundles for <version>
-func CreateManifests(version, previous, minVersion uint32, format uint, statedir string, numWorkers int) (*MoM, error) {
+func CreateManifests(version, previous, minVersion uint32, format uint, statedir string, numWorkers int, skipUpdateIndex bool) (*MoM, error) {
 	var err error
 	var c config
 
@@ -380,31 +380,34 @@ func CreateManifests(version, previous, minVersion uint32, format uint, statedir
 	}
 
 	// copy over unchanged manifests
-	addUnchangedManifests(&newMoM, oldMoM, groups)
+	addUnchangedManifests(&newMoM, oldMoM, groups, skipUpdateIndex)
 
-	// allManifests must include newManifests plus all old ones in the MoM.
-	allManifests, err := aggregateManifests(newManifests, &newMoM, version, c)
-	if err != nil {
-		return nil, err
-	}
+	if !skipUpdateIndex {
 
-	var osIdx *Manifest
-	if osIdx, err = writeIndexManifest(&c, &ui, allManifests); err != nil {
-		return nil, err
-	}
+		// allManifests must include newManifests plus all old ones in the MoM.
+		allManifests, err := aggregateManifests(newManifests, &newMoM, version, c)
+		if err != nil {
+			return nil, err
+		}
 
-	// read index manifest from the version directory specified in the manifest
-	// itself as an index manifest may not have been created for this version.
-	osIdxDir := filepath.Join(c.outputDir, fmt.Sprint(osIdx.Header.Version))
-	osIdxPath := filepath.Join(osIdxDir, "Manifest."+osIdx.Name)
-	if err = newMoM.createManifestRecord(osIdxDir, osIdxPath, osIdx.Header.Version, TypeManifest, osIdx.BundleInfo.Header.Status); err != nil {
-		return nil, err
-	}
+		var osIdx *Manifest
+		if osIdx, err = writeIndexManifest(&c, &ui, allManifests); err != nil {
+			return nil, err
+		}
 
-	// track here as well so the manifest tar is made
-	// but only if we made it new for this version
-	if osIdx.Header.Version == newMoM.Header.Version {
-		newManifests = append(newManifests, osIdx)
+		// read index manifest from the version directory specified in the manifest
+		// itself as an index manifest may not have been created for this version.
+		osIdxDir := filepath.Join(c.outputDir, fmt.Sprint(osIdx.Header.Version))
+		osIdxPath := filepath.Join(osIdxDir, "Manifest."+osIdx.Name)
+		if err = newMoM.createManifestRecord(osIdxDir, osIdxPath, osIdx.Header.Version, TypeManifest, osIdx.BundleInfo.Header.Status); err != nil {
+			return nil, err
+		}
+
+		// track here as well so the manifest tar is made
+		// but only if we made it new for this version
+		if osIdx.Header.Version == newMoM.Header.Version {
+			newManifests = append(newManifests, osIdx)
+		}
 	}
 
 	// handle full manifest

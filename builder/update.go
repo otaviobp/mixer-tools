@@ -53,7 +53,7 @@ func (b *Builder) buildUpdateContent(params UpdateParameters, timer *stopWatch) 
 	}
 
 	timer.Start("CREATE MANIFESTS")
-	mom, err := swupd.CreateManifests(b.MixVerUint32, previous, minVersion, uint(format), b.Config.Builder.ServerStateDir, b.NumBundleWorkers)
+	mom, err := swupd.CreateManifests(b.MixVerUint32, previous, minVersion, uint(format), b.Config.Builder.ServerStateDir, b.NumBundleWorkers, params.SkipUpdateIndex)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create update metadata")
 	}
