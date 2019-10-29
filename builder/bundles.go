@@ -624,7 +624,7 @@ func (b *Builder) buildBundles(set bundleSet, downloadRetries int) error {
 	outputDir := filepath.Join(b.Config.Builder.ServerStateDir, "www")
 
 	if _, ok := set["os-core"]; !ok {
-		return fmt.Errorf("os-core bundle not found")
+		fmt.Printf("Warning: os-core bundle not found. System may not be complete.\n")
 	}
 
 	// Bootstrap the directories.
@@ -732,14 +732,9 @@ src=%s
 		return err
 	}
 
-	var osCore *bundle
-	for _, bundle := range set {
-		if bundle.Name == "os-core" {
-			osCore = bundle
-			break
-		}
+	if osCore, ok := set["os-core"]; ok {
+		addOsCoreSpecialFiles(osCore)
 	}
-	addOsCoreSpecialFiles(osCore)
 
 	if updateBundle, ok := set[b.Config.Swupd.Bundle]; ok {
 		addUpdateBundleSpecialFiles(b, updateBundle)

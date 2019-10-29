@@ -906,9 +906,13 @@ func writeIndexManifest(c *config, ui *UpdateInfo, bundles []*Manifest) (*Manife
 			Version:   ui.version,
 			Previous:  ui.previous,
 			TimeStamp: ui.timeStamp,
-			Includes:  []*Manifest{newOsCore},
+			Includes:  []*Manifest{},
 		},
 		Name: IndexBundle,
+	}
+
+	if newOsCore != nil {
+		idxMan.Header.Includes = append(idxMan.Header.Includes, newOsCore)
 	}
 
 	bundleDir := filepath.Join(c.imageBase, fmt.Sprint(ui.version))
@@ -932,7 +936,9 @@ func writeIndexManifest(c *config, ui *UpdateInfo, bundles []*Manifest) (*Manife
 	// sort file list for processing
 	idxMan.sortFilesName()
 	// now subtract out the included os-core
-	idxMan.subtractManifests(newOsCore)
+	if newOsCore != nil {
+		idxMan.subtractManifests(newOsCore)
+	}
 	// figure out if we need to update any includes
 	for _, b := range bundles {
 		if b.Header.Version < ui.version {
