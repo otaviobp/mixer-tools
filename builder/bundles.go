@@ -638,7 +638,7 @@ func (b *Builder) buildBundles(set bundleSet, downloadRetries int) error {
 	}
 
 	if _, ok := set[b.Config.Swupd.Bundle]; !ok {
-		return fmt.Errorf("couldn't find bundle %q specified in configuration as the update bundle",
+		fmt.Printf("Warning: couldn't find bundle %q specified in configuration as the update bundle. Bundle won't be configured.\n",
 			b.Config.Swupd.Bundle)
 	}
 
@@ -732,7 +732,6 @@ src=%s
 		return err
 	}
 
-	updateBundle := set[b.Config.Swupd.Bundle]
 	var osCore *bundle
 	for _, bundle := range set {
 		if bundle.Name == "os-core" {
@@ -741,7 +740,10 @@ src=%s
 		}
 	}
 	addOsCoreSpecialFiles(osCore)
-	addUpdateBundleSpecialFiles(b, updateBundle)
+
+	if updateBundle, ok := set[b.Config.Swupd.Bundle]; ok {
+		addUpdateBundleSpecialFiles(b, updateBundle)
+	}
 
 	for _, bundle := range set {
 		err = writeBundleInfo(bundle, filepath.Join(buildVersionDir, bundle.Name+"-info"))
