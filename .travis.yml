@@ -39,4 +39,4 @@ before_install:
     - docker build -t testdock .
 
 script:
-    - docker run -e TEST_DIR=$TEST_DIR testdock
+    - sudo docker run -e TEST_DIR=$TEST_DIR testdock
